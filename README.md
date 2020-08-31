@@ -14,4 +14,9 @@ https://www.udemy.com/course/deep-q-learning-from-paper-to-code
 
 - actions: discrete vs. continuous action spaces
 - action space: set of all possible actions
-- discrete -> Q-Learning, continuous -> Actor-Cri????-Models
+- discrete -> Q-Learning, continuous -> Actor-Critic-Models
+
+# Markov Decision Processes
+- state depends only on previous state and action
+$$\sum_{i=1}^{10} t_i
+$$
