@@ -18,5 +18,4 @@ https://www.udemy.com/course/deep-q-learning-from-paper-to-code
 
 # Markov Decision Processes
 - state depends only on previous state and action
-$$\sum_{i=1}^{10} t_i
-$$
+$\hat{Y} = \hat{\beta}_{0} + \sum \limits _{j=1} ^{p} X_{j}\hat{\beta}_{j} $
