@@ -1,3 +1,4 @@
 .python-version
 plots
 .vscode
+__pycache__

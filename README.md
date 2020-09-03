@@ -56,4 +56,13 @@ https://www.udemy.com/course/deep-q-learning-from-paper-to-code
 - epsilon decay over time, but must stay finite (in training)
 
 # Temporal Difference Learning
+- update frequency algorithm dependent
 - updating agent after each time step vs. after episode end
+- Q-learning sort of online learning / good at non-episodic tasks
+- refining value function estimation: new_estimate = old_estimate + step_size (target - old_estimate)
+- most simple target = reward (most often not and often noisy)
+- ![equation](https://latex.codecogs.com/gif.latex?V'(s_{t})=V(s_{t})&plus;\alpha&space;(R_{t&plus;1}&plus;\gamma&space;V(s_{t&plus;1})-V(s_{t})))
+- Bootstrapping algorithm: updating estimate using another estimate
+- applied to Q: ![equation](https://latex.codecogs.com/gif.latex?Q'(s_{t},a_{t})=Q(s_{t},a_{t})&plus;\alpha&space;(R_{t&plus;1}&plus;\gamma&space;maxQ(s_{t&plus;1},&space;a_{max})-Q(s_{t},a_{t})))
+- off policy learning: epsilon greedy to update greedy policy
+- on policy learning: using same policy to update policy (SARSA, state action reward state' action')
