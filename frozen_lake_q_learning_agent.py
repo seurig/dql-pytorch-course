@@ -6,7 +6,7 @@ class Agent():
         for state in state_space: 
             self.Q[state] = {}
             for action in action_space:
-                self.Q[state][action] = 0 
+                self.Q[state][action] = 0.0
 
         self.alpha = alpha
         self.gamma = gamma
@@ -23,8 +23,16 @@ class Agent():
             action = np.argmax(list(self.Q[state].values()))
         return action
 
-    def learn(self, state, action, reward, state_):
+    def decay_epsilon(self):
+        self.epsilon = self.epsilon_min if self.epsilon * self.epsilon_decay < self.epsilon_min else self.epsilon * self.epsilon_decay
+        self.epsilon_history.append(self.epsilon)
+
+    def learn(self, state, action, reward, state_, done):
         # Q(s,a) = Q'(s,a) + alpha(r + gamma * max (Q(s', amax)) - Q'(s,a))
         Q_ = self.Q[state][action]
         maxQs_ = np.amax(list(self.Q[state_].values()))
-        self.Q[state][action] = Q_ + self.alpha * (reward + self.gamma * maxQs_ - Q_)
+        if done is False:
+            self.Q[state][action] = Q_ + self.alpha * (reward + self.gamma * maxQs_ - Q_)
+        else:
+            self.Q[state][action] = Q_ + self.alpha * (reward - Q_)
+        self.decay_epsilon()
