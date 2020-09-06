@@ -66,3 +66,9 @@ https://www.udemy.com/course/deep-q-learning-from-paper-to-code
 - applied to Q: ![equation](https://latex.codecogs.com/gif.latex?Q'(s_{t},a_{t})=Q(s_{t},a_{t})&plus;\alpha&space;(R_{t&plus;1}&plus;\gamma&space;maxQ(s_{t&plus;1},&space;a_{max})-Q(s_{t},a_{t})))
 - off policy learning: epsilon greedy to update greedy policy
 - on policy learning: using same policy to update policy (SARSA, state action reward state' action')
+
+# Deep Q Learning
+- Q tables will not work in continues space as table would need to be infinite size
+- neural net as universal function approximator
+- bias in neural nets: best guess in absence of input
+- weights in neural nets: importance of features
