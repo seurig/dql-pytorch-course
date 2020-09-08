@@ -15,7 +15,7 @@ class NeuralNet(nn.Module):
         self.loss = nn.MSELoss()
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.device = T.device('cpu')
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
 
     def forward(self, data):       
@@ -30,6 +30,7 @@ class DeepQAgent():
         self.epsilon_max = epsilon
         self.epsilon_decay = epsilon_decay
         self.epsilon_min = epsilon_min
+        self.epsilon_history = [epsilon]
         
         self.state_memory, self.action_memory, self.reward_memory, self.state__memory, self.terminal_memory = [], [], [], [], []
 
@@ -41,43 +42,47 @@ class DeepQAgent():
 
     def decay_epsilon(self):
         self.epsilon = self.epsilon * self.epsilon_decay if self.epsilon * self.epsilon_decay > self.epsilon_min else self.epsilon_min 
+        self.epsilon_history.append(self.epsilon)
 
     def remember(self, state, action, reward, state_, done):
         self.state_memory.append(state)
-        self.action_memory.append(action)
+        self.action_memory.append(np.eye(self.action_space_dims, dtype=np.bool)[action])
         self.reward_memory.append(reward)
         self.state__memory.append(state_)
         self.terminal_memory.append(done)
 
     def sample_memory(self):
-        print(len(self.state_memory), self.batch_size)
         if len(self.state_memory) >= self.batch_size:
             idc = np.random.choice(np.arange(len(self.state_memory)), self.batch_size)
             return np.array(self.state_memory)[idc], np.array(self.action_memory)[idc], np.array(self.reward_memory)[idc], \
                 np.array(self.state__memory)[idc], np.array(self.terminal_memory)[idc]
         else: return None
-    
+
     def learn(self):
         mem_sample = self.sample_memory()
         if mem_sample is not None:
-            for states, actions, rewards, states_, dones in mem_sample:
-                self.DQN.optimizer.zero_grad()
-                states = T.tensor(states, dtype=T.float).to(self.DQN.device)
-                actions = T.tensor(actions).to(self.DQN.device)
-                rewards = T.tensor(rewards).to(self.DQN.device)
-                states_ = T.tensor(states_, dtype=T.float).to(self.DQN.device)
+            states, actions, rewards, states_, _ = mem_sample
+            self.DQN.optimizer.zero_grad()
 
-                Q_pred = self.DQN.forward(states)[actions]
-                Q_next = self.DQN.forward(states_).max()
-                
-                # Q(s,a) = Q'(s,a) + alpha(r + gamma * max (Q(s', amax)) - Q'(s,a))
-                # Q(s,a) = r + gamma * max (Q(s', amax)) 
-                Q_target = rewards + self.gamma * Q_next
-                
-                cost = self.DQN.loss(Q_pred, Q_target).to(self.DQN.device)
-                cost.backward()
-                self.DQN.optimizer.step()
-                self.decay_epsilon()      
+            states = T.tensor(states, dtype=T.float).to(self.DQN.device)
+            actions = T.tensor(actions).to(self.DQN.device)
+            rewards = T.tensor(rewards).to(self.DQN.device)
+            states_ = T.tensor(states_, dtype=T.float).to(self.DQN.device)
+
+            Q_pred = self.DQN.forward(states)
+            Q_next = self.DQN.forward(states_)
+
+            Q_pred = T.masked_select(Q_pred, actions)
+            Q_next, _ = T.max(Q_next, dim=-1)
+            
+            # Q(s,a) = Q'(s,a) + alpha(r + gamma * max (Q(s', amax)) - Q'(s,a))
+            # MSE = mse(r + gamma * max (Q(s', amax)), Q(s,a))
+            Q_target = rewards + self.gamma * Q_next
+            
+            cost = self.DQN.loss(Q_pred, Q_target).to(self.DQN.device)
+            cost.backward()
+            self.DQN.optimizer.step()
+            self.decay_epsilon()      
 
     def act(self, state):
         if self.epsilon > np.random.random():
