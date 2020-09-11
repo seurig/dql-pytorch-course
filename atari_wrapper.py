@@ -67,11 +67,11 @@ class StackFrames(gym.ObservationWrapper):
         state = self.env.reset()
         for _ in range(self.stack.maxlen):
             self.stack.append(state)
-        return np.array(self.stack).reshape(self.observation_shape.low.shape)
+        return np.array(self.stack).reshape(self.observation_space.low.shape)
 
     def observation(self, state):
         self.stack.append(state)
-        return np.array(self.stack).reshape(self.observation_shape.low.shape)
+        return np.array(self.stack).reshape(self.observation_space.low.shape)
 
 def make_environment(env_name, shape=(84, 84, 1), repeat=4, clip_rewards=False, no_ops=0, fire_first=False):
     env = gym.make(env_name)

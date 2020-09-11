@@ -1,15 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_learning_curve(scores, n_avg, epsilons, filename):
+def plot_learning_curve(x, scores, n_avg, epsilons, filename):
     n = len(scores)
-    x = np.arange(n)
 
     score_avgs = np.empty(shape=n)
     for idx in range(n):
         score_avgs[idx] = np.mean(scores[max(0, idx-n_avg):(idx+1)])
-
-    print(len(score_avgs), len(epsilons))
     
     fig = plt.figure()
     ax = fig.add_subplot(111, label='1')
