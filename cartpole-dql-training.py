@@ -10,8 +10,10 @@ epsilon_min = 0.01
 alpha = 0.001
 gamma = 0.99
 hidden_layer_dims = 128
-n_games = 10000
+update_target_net = 100
+n_games = 1000
 batch_size = 32
+max_memory_size = 1000000
 
 state_space_dims, action_space_dims = 4, 2
 
@@ -23,7 +25,7 @@ plot_filename = 'plots/cartpole-dql.png'
 
 env = gym.make('CartPole-v1')
 
-agent = DeepQAgent(epsilon, epsilon_decay, epsilon_min, alpha, gamma, state_space_dims, action_space_dims, hidden_layer_dims, batch_size)
+agent = DeepQAgent(epsilon, epsilon_decay, epsilon_min, alpha, gamma, state_space_dims, action_space_dims, hidden_layer_dims, update_target_net, batch_size, max_memory_size)
 
 for i in tqdm(range(n_games)):
     state = env.reset()
@@ -33,7 +35,7 @@ for i in tqdm(range(n_games)):
     while done is False:
         action = agent.act(state)
         state_, reward, done, _ = env.step(action)
-        agent.remember(state, action, reward, state_, done)
+        agent.memory.remember(state, action, reward, state_, done)
         score += reward
         state = state_
 
