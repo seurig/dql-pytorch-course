@@ -3,7 +3,7 @@ import numpy as np
 
 from agent_memory import AgentMemory
 
-class DeepQAgent():
+class DoubleDeepQAgent():
     def __init__(self, epsilon, epsilon_decay, epsilon_min, \
                         gamma, \
                         state_space_dims, action_space_dims, \
@@ -50,10 +50,13 @@ class DeepQAgent():
         states_ = T.tensor(states_).to(self.DQN.device)
         dones = T.tensor(dones).to(self.DQN.device)
 
-        Q_pred = self.DQN.forward(states)[np.arange(self.batch_size), actions]
+        batch_indices = np.arange(self.batch_size)
 
-        Q_next = self.target_DQN.forward(states_)
-        Q_next, _ = T.max(Q_next, dim=1)
+        Q_pred = self.DQN.forward(states)[batch_indices, actions]
+
+        Q_argmax = T.argmax(self.DQN.forward(states_), dim=1)
+        
+        Q_next = self.target_DQN.forward(states_)[batch_indices, Q_argmax]
         Q_next[dones] = 0.0
         
         # Q(s,a) = Q'(s,a) + alpha(r + gamma * max (Q(s', amax)) - Q'(s,a))

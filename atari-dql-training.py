@@ -13,9 +13,9 @@ alpha = 0.0001
 gamma = 0.99
 update_target_net = 1000
 weights_file = f'checkpoints/{game_name}-dqn.pt'
-n_games = 500
+n_games = 300 # 500
 batch_size = 32
-max_memory_size = 10000 # 50000
+max_memory_size = 15000 # 50000
 evaluation = False
 
 scores, steps_array, epsilon_history = [], [], []
