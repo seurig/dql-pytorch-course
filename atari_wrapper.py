@@ -9,7 +9,7 @@ class RepeatActionMaxFrame(gym.Wrapper):
         super(RepeatActionMaxFrame, self).__init__(env)
         self.repeat = repeat
         self.shape = env.observation_space.low.shape
-        self.frame_buffer = np.zeros_like((2, self.shape))
+        self.frame_buffer = np.zeros(shape=(2, *self.shape))
         self.clip_rewards = clip_rewards
         self.no_ops = no_ops
         self.fire_first = fire_first
@@ -37,7 +37,7 @@ class RepeatActionMaxFrame(gym.Wrapper):
         if self.fire_first:
             assert self.env.unwrapped.get_action_meanings()[1] == 'FIRE'
             state, *_ = self.env.step(1)
-        self.frame_buffer = np.zeros_like((2, self.shape))
+        self.frame_buffer = np.zeros(shape=(2, *self.shape))
         self.frame_buffer[0] = state
         return state
 

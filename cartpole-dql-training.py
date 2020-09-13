@@ -11,11 +11,11 @@ epsilon_min = 0.01
 alpha = 0.0001
 gamma = 0.99
 hidden_layer_dims = 128
-update_target_net = 1000
+update_target_net = 250
 weights_file = 'checkpoints/cartpole-dqn.pt'
-n_games = 10000
+n_games = 1500
 batch_size = 32
-max_memory_size = 20000
+max_memory_size = 50000
 
 state_space_dims, action_space_dims = [4], 2
 
@@ -48,7 +48,7 @@ for i in tqdm(range(n_games)):
 
     scores.append(score)
     avg_score = np.mean(scores[-n_games_avg:])
-    max_score = np.amax(avg_scores) if len(avg_scores) > 0 else avg_score
+    max_score = np.amax(avg_scores) if len(avg_scores) > 0 else -np.inf
     avg_scores.append(avg_score)
     epsilon_history.append(agent.epsilon)
 

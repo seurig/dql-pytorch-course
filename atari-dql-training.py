@@ -13,13 +13,13 @@ alpha = 0.0001
 gamma = 0.99
 update_target_net = 1000
 weights_file = f'checkpoints/{game_name}-dqn.pt'
-n_games = 10 #500
+n_games = 500
 batch_size = 32
-max_memory_size = 20000 # 50000
+max_memory_size = 10000 # 50000
 evaluation = False
 
 scores, steps_array, epsilon_history = [], [], []
-n_games_avg = 100
+n_score_avg = 100
 n_steps = 0
 best_score = -np.inf
 
@@ -34,6 +34,7 @@ target_DQN = ConvNeuralNet(state_space_dims, action_space_dims, alpha, weights_f
 agent = DeepQAgent(epsilon, epsilon_decay, epsilon_min, gamma, state_space_dims, action_space_dims, DQN, target_DQN, update_target_net, batch_size, max_memory_size)
 
 for i in tqdm(range(n_games)):
+
     state = env.reset()
     score = 0
     done = False
@@ -42,8 +43,8 @@ for i in tqdm(range(n_games)):
         action = agent.act(state)
         state_, reward, done, _ = env.step(action)
 
-        if evaluation:
-            agent.memory.remember(state, action, reward, state_, int(done))
+        if evaluation is False:
+            agent.memory.remember(state, action, reward, state_, done)
             agent.learn()
         
         score += reward
@@ -52,17 +53,16 @@ for i in tqdm(range(n_games)):
 
     scores.append(score)
     steps_array.append(n_steps)
-    avg_score = np.mean(scores[-n_games_avg:])   
+    avg_score = np.mean(scores[-n_score_avg:])   
 
-    if i % n_games_avg == 0: 
-        print(f'episode: {i}\t {n_games_avg} game avg score: {avg_score:.2f}\t epsilon: {agent.epsilon:.2f}\t steps: {n_steps}')
-        if avg_score > best_score: 
-            if evaluation is False:
-                agent.DQN.save_weights()
-            best_score = avg_score
+    print(f'episode: {i}\t {n_score_avg} game avg score: {avg_score:.2f}\t epsilon: {agent.epsilon:.2f}\t steps: {n_steps}')
+    if avg_score > best_score: 
+        if evaluation is False:
+            agent.DQN.save_weights()
+        best_score = avg_score
     epsilon_history.append(agent.epsilon)
 env.close()
 
-plot_learning_curve(steps_array, scores, n_games_avg, epsilon_history, plot_filename)
+plot_learning_curve(steps_array, scores, n_score_avg, epsilon_history, plot_filename)
 
     
