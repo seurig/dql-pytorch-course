@@ -24,5 +24,5 @@ class AgentMemory():
     def sample(self, batch_size):
         n = min(self.memory_counter, self.max_size)
         idc = np.random.choice(n, batch_size, replace=False)
-        return np.array(self.state_memory)[idc], np.array(self.action_memory)[idc], np.array(self.reward_memory)[idc], \
-            np.array(self.state__memory)[idc], np.array(self.terminal_memory)[idc]
+        return self.state_memory[idc], self.action_memory[idc], self.reward_memory[idc], \
+            self.state__memory[idc], self.terminal_memory[idc]
