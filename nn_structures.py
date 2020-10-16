@@ -35,6 +35,41 @@ class NeuralNet(nn.Module):
     def save_weights(self):
         T.save(self.state_dict(), self.weights_file)
 
+class DuelingNeuralNet(nn.Module):
+    def __init__(self, input_dims, output_dims, lr, weights_file):
+        super(DuelingNeuralNet, self).__init__()
+        self.weights_file = weights_file
+        
+        self.fc1 = nn.Linear(*input_dims, 512)
+        self.fc2 = nn.Linear(512, 512)
+
+        self.V_layer = nn.Linear(512, 1)
+        self.A_layer = nn.Linear(512, output_dims)
+
+        self.loss = nn.MSELoss()
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
+
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.to(self.device)
+
+        if os.path.isfile(self.weights_file):
+            self.load_weights()
+
+    def forward(self, data):       
+        layer1 = F.relu(self.fc1(data))
+        layer2 = F.relu(self.fc2(layer1))
+
+        V = self.V_layer(layer2)
+        A = self.A_layer(layer2)
+
+        return V, A     
+
+    def load_weights(self):
+        self.load_state_dict(T.load(self.weights_file))
+
+    def save_weights(self):
+        T.save(self.state_dict(), self.weights_file)
+
 class ConvNeuralNet(nn.Module):
     def __init__(self, input_dims, output_dims, lr, weights_file):
         super(ConvNeuralNet, self).__init__()

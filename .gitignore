@@ -1,5 +1,6 @@
 .python-version
 plots
 checkpoints
+videos
 .vscode
 __pycache__

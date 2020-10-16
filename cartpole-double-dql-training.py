@@ -1,4 +1,4 @@
-from double_deep_q_agent import DoubleDeepQAgent
+from agents import DoubleDeepQAgent
 from nn_structures import NeuralNet
 import gym
 import numpy as np

@@ -1,4 +1,4 @@
-from deep_q_agent import DeepQAgent
+from agents import DeepQAgent
 from nn_structures import NeuralNet
 import gym
 import numpy as np
