@@ -114,9 +114,9 @@ class ConvNeuralNet(nn.Module):
     def save_weights(self):
         T.save(self.state_dict(), self.weights_file)
 
-class DuelingDeepNet(nn.Module):
+class DuelingConvNeuralNet(nn.Module):
     def __init__(self, input_dims, output_dims, lr, weights_file):
-        super(DuelingDeepNet, self).__init__()
+        super(DuelingConvNeuralNet, self).__init__()
         self.weights_file = weights_file
         
         self.conv1 = nn.Conv2d(input_dims[0], 32, 8, stride=4)

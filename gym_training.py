@@ -1,6 +1,6 @@
 import argparse
 import agents as Agents
-from nn_structures import DuelingNeuralNet
+import nn_structures as NN_DQL
 import gym
 from gym import wrappers
 from plotting import plot_learning_curve
@@ -37,16 +37,15 @@ plot_filename = f'plots/{args.env_name}-{args.algorithm}.png'
 
 env = gym.make(args.env_name)
 
-#env = wrappers.Monitor(env, 'videos/video', video_callable=lambda episode_id: True, force=True)
-
 state_space_dims, action_space_dims = env.observation_space.shape, env.action_space.n
 
 if 'Dueling' in args.algorithm:
-    DQN = DuelingNeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
-    target_DQN = DuelingNeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
+    nn_ = getattr(NN_DQL, 'DuelingNeuralNet')
 else:
-    DQN = NeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
-    target_DQN = NeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
+    nn_ = getattr(NN_DQL, 'NeuralNet')
+
+DQN = nn_(state_space_dims, action_space_dims, args.alpha, weights_file)
+target_DQN = nn_(state_space_dims, action_space_dims, args.alpha, weights_file)
 
 if args.evaluation is True: 
     DQN.load_weights()
