@@ -7,12 +7,12 @@ import numpy as np
 import os
 
 class NeuralNet(nn.Module):
-    def __init__(self, input_dims, fc1_dims, output_dims, lr, weights_file):
+    def __init__(self, input_dims, output_dims, lr, weights_file):
         super(NeuralNet, self).__init__()
         self.weights_file = weights_file
         
-        self.fc1 = nn.Linear(*input_dims, fc1_dims)
-        self.fc2 = nn.Linear(fc1_dims, output_dims)
+        self.fc1 = nn.Linear(*input_dims, 512)
+        self.fc2 = nn.Linear(512, output_dims)
 
         self.loss = nn.MSELoss()
         self.optimizer = optim.Adam(self.parameters(), lr=lr)

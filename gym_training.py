@@ -1,4 +1,5 @@
-from agents import DuelingDoubleDeepQAgent
+import argparse
+import agents as Agents
 from nn_structures import DuelingNeuralNet
 import gym
 from gym import wrappers
@@ -6,38 +7,55 @@ from plotting import plot_learning_curve
 import numpy as np
 from tqdm import tqdm
 
-game_name = 'CartPole-v1'
-epsilon = 1.0
-epsilon_decay = 0.9995
-epsilon_min = 0.01
-alpha = 0.0001
-gamma = 0.99
-update_target_net = 250
-weights_file = f'checkpoints/{game_name}-dueling_double_dqn.pt'
-n_games = 1500
-batch_size = 32
-max_memory_size = 50000
-evaluation = False
+parser = argparse.ArgumentParser(description='DQL Training in gym environment')
+parser.add_argument('-env_name', type=str, default='CartPole-v1', help='which environment to train on')
+parser.add_argument('-algorithm', type=str, default='DuelingDoubleDeepQAgent', help='which learning algorithm to use')
+parser.add_argument('-epsilon', type=float, default=1.0, help='starting epsilon value')
+parser.add_argument('-epsilon_decay', type=float, default=0.9995, help='number epsilon is multiplied by every iteration')
+parser.add_argument('-epsilon_min', type=float, default=0.01, help='min epsilon value')
+parser.add_argument('-alpha', type=float, default=0.0001, help='learning rate')
+parser.add_argument('-gamma', type=float, default=0.99, help='future experience importance reduction factor')
+parser.add_argument('-update_target_net', type=int, default=250, help='after how many iterations to update target nn')
+parser.add_argument('-n_games', type=int, default=1500, help='how many games to play')
+parser.add_argument('-batch_size', type=int, default=32, help='batch size for nn training')
+parser.add_argument('-max_memory_size', type=int, default=50000, help='max number datasets in memory')
+parser.add_argument('-evaluation', type=bool, default=False, help='no training')
+
+args = parser.parse_args()
+
+weights_file = f'checkpoints/{args.env_name}-{args.algorithm}.pt'
+
+epsilon, epsilon_decay, epsilon_min = args.epsilon, args.epsilon_decay, args.epsilon_min
+if args.evaluation is True: epsilon, epsilon_decay, epsilon_min = 0, 0, 0
 
 scores, steps_array, epsilon_history = [], [], []
 n_score_avg = 100
 n_steps = 0
 best_score = -np.inf
 
-plot_filename = f'plots/{game_name}-dueling_double_dql.png'
+plot_filename = f'plots/{args.env_name}-{args.algorithm}.png'
 
-env = gym.make(game_name)
+env = gym.make(args.env_name)
 
 #env = wrappers.Monitor(env, 'videos/video', video_callable=lambda episode_id: True, force=True)
 
 state_space_dims, action_space_dims = env.observation_space.shape, env.action_space.n
 
-DQN = DuelingNeuralNet(state_space_dims, action_space_dims, alpha, weights_file)
-target_DQN = DuelingNeuralNet(state_space_dims, action_space_dims, alpha, weights_file)
+if 'Dueling' in args.algorithm:
+    DQN = DuelingNeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
+    target_DQN = DuelingNeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
+else:
+    DQN = NeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
+    target_DQN = NeuralNet(state_space_dims, action_space_dims, args.alpha, weights_file)
 
-agent = DuelingDoubleDeepQAgent(epsilon, epsilon_decay, epsilon_min, gamma, state_space_dims, action_space_dims, DQN, target_DQN, update_target_net, batch_size, max_memory_size)
+if args.evaluation is True: 
+    DQN.load_weights()
+    target_DQN.load_weights()
 
-for i in tqdm(range(n_games)):
+agent_ = getattr(Agents, args.algorithm)
+agent = agent_(epsilon, epsilon_decay, epsilon_min, args.gamma, state_space_dims, action_space_dims, DQN, target_DQN, args.update_target_net, args.batch_size, args.max_memory_size)
+
+for i in tqdm(range(args.n_games)):
 
     state = env.reset()
     score = 0
@@ -47,7 +65,7 @@ for i in tqdm(range(n_games)):
         action = agent.act(state)
         state_, reward, done, _ = env.step(action)
 
-        if evaluation is False:
+        if args.evaluation is False:
             agent.memory.remember(state, action, reward, state_, done)
             agent.learn()
         
@@ -61,12 +79,10 @@ for i in tqdm(range(n_games)):
 
     print(f'episode: {i}\t {n_score_avg} game avg score: {avg_score:.2f}\t epsilon: {agent.epsilon:.2f}\t steps: {n_steps}')
     if avg_score > best_score: 
-        if evaluation is False:
+        if args.evaluation is False:
             agent.DQN.save_weights()
         best_score = avg_score
     epsilon_history.append(agent.epsilon)
 env.close()
 
 plot_learning_curve(steps_array, scores, n_score_avg, epsilon_history, plot_filename)
-
-    
