@@ -1,13 +1,23 @@
-import matplotlib.pyplot as plt
+''' Plotting functions for Reinforcement Learning using matplotlib '''
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 def plot_learning_curve(x, scores, n_avg, epsilons, filename):
+    ''' plotting learning curve with given:
+    - x
+    - scores
+    - n_avg
+    - epsilons
+    - filename
+    '''
+
     n = len(scores)
 
     score_avgs = np.empty(shape=n)
     for idx in range(n):
         score_avgs[idx] = np.mean(scores[max(0, idx-n_avg):(idx+1)])
-    
+
     fig = plt.figure()
     ax = fig.add_subplot(111, label='1')
     ax2 = fig.add_subplot(111, label='2', frame_on=False)
